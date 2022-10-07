@@ -27,37 +27,14 @@ export class AppController {
   }
 
   //GENERATES CSV
-  @Post('export')
+  @Post('export')  
+  @Header('Content-Type','text/csv')
+  @Header('Content-Disposition','attachment; filename="example.csv"')
   exportCSV(
     @Body() input: {[x:string]:any}[],
     @Res() res: Response
   ){
     return this.appService.formatCSV(input)
     .then(buffer=> res.send(buffer))
-  }
-
-  @Get()
-  @Header('Content-Application','text/csv')
-  @Header('Content-Disposition','attachment; filename="example.csv"',)
-  exampleFileDownload(
-    @Res() res: Response
-  ){
-    return this.appService.formatCSV(
-      [        
-        {
-          "nombre":"john",
-          "apellido":"doe",
-          "telefono":"",
-          "edad":48
-        },
-        {
-          "nombre":"john",
-          "apellido":"doe",
-          "telefono":"04121111111",
-          "edad":""
-        }
-      ]
-    )
-    .then(buffer=>res.send(buffer))
-  }
+  }  
 }
