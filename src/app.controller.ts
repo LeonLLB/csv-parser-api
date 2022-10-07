@@ -1,7 +1,7 @@
-import { Body, Controller, HttpStatus, ParseFilePipeBuilder, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Header, HttpStatus, ParseFilePipeBuilder, Post, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AppService } from './app.service';
-
+import {Response} from 'express'
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
@@ -28,7 +28,36 @@ export class AppController {
 
   //GENERATES CSV
   @Post('export')
-  exportCSV(@Body() input: {[x:string]:any}[]){
+  exportCSV(
+    @Body() input: {[x:string]:any}[],
+    @Res() res: Response
+  ){
     return this.appService.formatCSV(input)
+    .then(buffer=> res.send(buffer))
+  }
+
+  @Get()
+  @Header('Content-Application','text/csv')
+  @Header('Content-Disposition','attachment; filename="example.csv"',)
+  exampleFileDownload(
+    @Res() res: Response
+  ){
+    return this.appService.formatCSV(
+      [
+        {
+          "nombre":"Luisa",
+          "apellido":"Morales",
+          "telefono":"04147824956",
+          "edad":""
+        },
+        {
+          "nombre":"john",
+          "apellido":"doe",
+          "telefono":"",
+          "edad":48
+        }
+      ]
+    )
+    .then(buffer=>res.send(buffer))
   }
 }

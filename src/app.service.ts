@@ -43,10 +43,9 @@ export class AppService {
       i++
     }
 
-    const result = await csv.writeToString(rows,{headers})
-    console.log(result)
+    const result = await csv.writeToBuffer(rows,{headers})
 
-    return rows
+    return result
 
   }
 }
