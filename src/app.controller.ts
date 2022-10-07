@@ -43,18 +43,18 @@ export class AppController {
     @Res() res: Response
   ){
     return this.appService.formatCSV(
-      [
-        {
-          "nombre":"Luisa",
-          "apellido":"Morales",
-          "telefono":"04147824956",
-          "edad":""
-        },
+      [        
         {
           "nombre":"john",
           "apellido":"doe",
           "telefono":"",
           "edad":48
+        },
+        {
+          "nombre":"john",
+          "apellido":"doe",
+          "telefono":"04121111111",
+          "edad":""
         }
       ]
     )

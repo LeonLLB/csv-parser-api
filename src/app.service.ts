@@ -1,23 +1,48 @@
 import { Readable } from 'stream';
 import fs from 'fs'
-import { Injectable, UnprocessableEntityException } from '@nestjs/common';
+import { Injectable, UnprocessableEntityException, InternalServerErrorException } from '@nestjs/common';
 import * as csv from 'fast-csv'
 import { compareArrays } from './helpers/compare-arrays.helper';
+import { parseInput } from './helpers/parse-input.helper';
 
 @Injectable()
 export class AppService {
 
-  parseCSV(file: Express.Multer.File){
+  parseCSV(file: Express.Multer.File): Promise<{[x:string]:any}>{  
 
-    console.log(file)
-    
+    return new Promise((resolve,reject)=>{
+      const readStream = new Readable({
+        read(){
+          this.push(file.buffer)
+          this.push(null)
+        }
+      })
+  
+      const rows = []
+      let isInHeaderRow = true
+      let headers = []
+  
+      csv.parseStream(readStream)
+      .on('error', error => {console.error(error);throw new InternalServerErrorException("Error al parsear CSV")})
+      .on('data', row => {
+  
+        if(isInHeaderRow) {headers = row; isInHeaderRow = false ;return}
+  
+        const value: {[x:string]:any} = {}
+        let i = 0
+        for(const header of headers){
+          value[header] = parseInput(row[i])
+          i++
+        }
+        rows.push(value)
+  
+      })
+      .on('end',()=>resolve(rows))
+    })
+
   }
 
   async formatCSV(inputs: {[x:string]:any}[]){
-
-    // const csvStream = csv.format()
-
-    // csvStream.pipe(process.stdout)
 
     const rows: any[] = []
     let headers: any[] = [] 
